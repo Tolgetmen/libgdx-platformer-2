@@ -37,7 +37,7 @@ public class Platformer extends Game {
 
     @Override
     public void render() {
-		super.render(); // Delegates the rendering to the active screen.
+        super.render(); // Delegates the rendering to the active screen.
     }
 
     @Override

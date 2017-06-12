@@ -67,9 +67,6 @@ public class Hero extends DynamicEntity {
         if (Gdx.input.isKeyPressed(Input.Keys.UP) && isTouchingDown) {
             setVelocityY(jumpVelocity);
         }
-        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-            setVelocityY(-1);
-        }
     }
 
     @Override

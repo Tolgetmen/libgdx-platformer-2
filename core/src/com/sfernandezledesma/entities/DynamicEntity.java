@@ -37,6 +37,9 @@ public class DynamicEntity extends Entity {
         newBox = new AABB(box);
     }
 
+    public void handleInput() {
+    }
+
     @Override
     public void update(float delta) {
         velocityX += accelerationX * delta;
@@ -62,7 +65,7 @@ public class DynamicEntity extends Entity {
         //Gdx.app.log("COLLISION INFO", "Moving entity " + this.myID);
         setResolvingCollision(true);
         // First we try to move horizontally
-        if(!moveAndCollideHorizontally(world, delta))
+        if (!moveAndCollideHorizontally(world, delta))
             return false;
         // Now we try moving vertically
         return moveAndCollideVertically(world, delta);

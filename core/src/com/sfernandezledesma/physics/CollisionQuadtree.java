@@ -67,6 +67,14 @@ public class CollisionQuadtree {
         bottomRightTree = new CollisionQuadtree(getLevel() + 1, new AABB(centerX, getBounds().bottomSideY(), halfWidth, halfHeight), this);
     }
 
+    public boolean update(Entity e) {
+        if(!remove(e)) {
+            Gdx.app.log("QUADTREE ERROR", "Tried to remove something that isn't there");
+            return false;
+        }
+        return add(e);
+    }
+
     public boolean add(Entity e) {
         if (!e.getBox().insideOf(bounds)) {
             if (parent == null) {

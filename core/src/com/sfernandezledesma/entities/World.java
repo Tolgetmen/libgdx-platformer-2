@@ -52,8 +52,10 @@ public class World {
 
     public void update(float delta) {
         // First we update the dynamic entities (this updates velocities, accelerations, etc)
-        for (DynamicEntity e : dynamicEntities)
+        for (DynamicEntity e : dynamicEntities) {
+            e.handleInput();
             e.update(delta);
+        }
 
         for (DynamicEntity e : dynamicEntities) {
             // Invariant: All rigid entities are NOT colliding, we have to keep that invariant before each moveAndCollide

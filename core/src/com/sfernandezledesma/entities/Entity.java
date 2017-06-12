@@ -53,15 +53,13 @@ public abstract class Entity {
     }
 
     public boolean setX(double x) {
-        quadtree.remove(this);
         box.setX(x);
-        return quadtree.add(this);
+        return quadtree.update(this);
     }
 
     public boolean setY(double y) {
-        quadtree.remove(this);
         box.setY(y);
-        return quadtree.add(this);
+        return quadtree.update(this);
     }
 
     public double getX() {
@@ -73,15 +71,13 @@ public abstract class Entity {
     }
 
     public boolean translateX(double dx) {
-        quadtree.remove(this);
         box.setX(box.getX() + dx);
-        return quadtree.add(this);
+        return quadtree.update(this);
     }
 
     public boolean translateY(double dy) {
-        quadtree.remove(this);
         box.setY(box.getY() + dy);
-        return quadtree.add(this);
+        return quadtree.update(this);
     }
 
     private float getOffsetSpriteX() {
@@ -90,9 +86,6 @@ public abstract class Entity {
 
     private float getOffsetSpriteY() {
         return offsetsSprite.y;
-    }
-
-    public void handleInput() {
     }
 
     public void update(float delta) {

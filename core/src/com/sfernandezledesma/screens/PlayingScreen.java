@@ -110,11 +110,10 @@ public class PlayingScreen extends GameScreen {
 
     @Override
     public void render(float delta) {
-        delta = Math.min(delta, Platformer.MAX_DELTA);
         //fpsLogger.log();
-        if (hero != null) hero.handleInput();
-        if (!paused) world.update(delta);
         //Gdx.app.log("QUADTREE INFO", "Total entities: " + world.getQuadtree().getTotalEntities());
+        delta = Math.min(delta, Platformer.MAX_DELTA);
+        if (!paused) world.update(delta);
 
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
