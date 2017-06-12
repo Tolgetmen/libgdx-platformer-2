@@ -1,0 +1,67 @@
+Idea del algoritmo para "arreglar" un nivel
+===========================================
+Partiendo de un nivel "conexo a lo roguelike", es decir, que si se pudiera "volar" en el juego de plataformas, no podría el jugador quedar atrapado, me planteo el caso donde la física es la esperable en un platformer, lo que implica que el jugador sí podría quedar atrapado, por ejemplo en un pozo. Quiero arreglar el nivel para que sea viable en un platformer procedural.
+"Arreglar" significa hacer conexo el nivel, esto es, que si consideramos como G al digrafo donde los nodos son los tiles libres tales que tienen una plataforma inmediatamente abajo (o sea, son "pisables"), lograr que G sea conexo.
+Por ejemplo, si tengo el siguiente nivel (donde " " es un tile libre y "*" uno con un tile ocupado por un bloque colisionable, y siendo las letras también tiles libres que sólo son un nombre para la zona que interesa):
+
+Con zonas demarcadas:            Con los nodos marcados con "o":
+   ***************                      ***************
+   *      A      *                      *     ooo     *
+   *     ***     *                      *     ***     *
+   *             *                      *             *
+   *             *                      *             *
+   *  B       C  *                      *ooooo   ooooo*
+   ******   ******                      ******   ******
+   ******   ******                      ******   ******
+   ******   ******                      ******   ******
+   ****** D ******                      ******ooo******
+   ***************                      ***************
+
+Un nodo v será adyacente a otro w si mediante un movimiento puede llegarse físicamente desde v a w, es decir, si mediante un salto, o moviéndose horizontalmente (teniendo en cuenta la caída) se "cae" en w.
+Para asegurarme la conexión, suponiendo que tengo una función F(v) que me devuelve los nodos adyacentes a v, lo que hago es empezar desde arriba, en el ejemplo sería empezar desde la plataforma superior que tiene tres nodos, y "dejarme caer" pero asegurándome que cada caída puede ser "deshecha", esto es, que puedo volver al mismo lugar de alguna manera.
+
+Más formalmente: Se ordenan los nodos por altura de mayor a menor, y para cada uno se ponen las aristas correspondientes según la función F. Cada vez que se agrega una arista, es decir, cada vez que se conecta a un v con un w, se chequea si hay camino desde w a v (yendo por las aristas de los nodos del digrafo). Si no hay camino, se guarda el par (w,v) en una lista que indica los nodos que potencialmente haya que arreglar. Una vez que se terminan de recorrer todos los nodos, se revisa esta lista y si en este caso sigue sin haber camino de w a v, se crean plataformas livianas (esto es, que no colisionan inferiormente, para evitarnos problemas) de manera tal que haya un camino de w a v. Se sigue con la lista hasta terminar, y entonces, por como construimos las aristas del digrafo, (en teoría) asegura que para todo par de nodos, existe un camino entre ellos, y por lo tanto G es conexo.
+
+En el ejemplo, se arrancaría desde la plataforma A, y entonces van a crearse aristas entre esos tres nodos, y entre los nodos "borde" y uno o más nodos (según las propiedades físicas del juego) de los nodos que están en B y en C. Estamos suponiendo que no podemos "caernos" desde A directamente hasta D, lo cual --de nuevo-- depende del engine fisico del juego. Supongamos que no podemos saltar desde B a A, ni desde C a A. Tampoco puede saltarse desde D a B ni a C. Todas esas aristas que no existen quedarán guardadas en la lista de posibles arreglos. Cuando se empiece con eso, se va a arreglar (supongamos) la conexión desde algún nodo de B con A. Entonces, se crea una plataforma liviana entre B y A (marcada con "-"). Luego, al chequear los demás nodos de B que no llegaban a A, gracias a la nueva plataforma, van a llegar, entonces no se hace nada. Como (supongamos) desde C puede saltarse a B, también hay un camino de C a A, entonces tampoco necesita ponerse una plataforma de ese lado. Finalmente, supongamos que se intenta arreglar un nodo de D con uno del borde de C, se crea una plataforma, y gracias a eso, puede llegarse a B también (vía C). Por lo tanto, se vacía la lista y el digrafo (nivel) queda conexo.
+                                                                                    
+***************             ***************             ***************                 ***************
+*      A      *             *      A      *             *      A      *                 *     ooo     *
+*     ***     *             *     ***     *             *     ***     *                 *     ***     *
+*             *   paso 1    *             *   paso 2    *             *                 *  o          *
+*             *   ----->    *  -          *   ----->    *  -          *                 *  -          *  (mapa de nodos)
+* B        C  *             *  B       C  *             *  B       C  *                 *ooooo   ooooo*
+******   ******             ******   ******             ******   ******                 ******   ******
+******   ******             ******   ******             ******   ******                 ******  o******
+******   ******             ******   ******             ******  -******                 ******  -******
+****** D ******             ****** D ******             ****** D ******                 ******ooo******
+***************             ***************             ***************                 ***************
+
+La cuestión de cómo funciona F y cómo poner las plataformas livianas son problemas creo no tan difíciles. Para F, probablemente la mejor idea (y la más eficiente) sea hacer una algoritmo aproximado que vaya recorriendo los tiles teniendo en cuenta los bloqueos posibles. Lo más complicado es tratar de hacerlo teniendo en cuenta parámetros como altura máxima de un salto, para evitar que F sea muy ad-hoc y después si cambio algún parámetro tenga que modificarla también. Para las plataformas livianas quizás pueda servir usar camino mínimo "cheateando", es decir, sin tener en cuenta las limitaciones físicas de los saltos, pero sí teniendo en cuenta las colisiones, y randomizar un poco la posición de la plataforma (pero siempre teniendo en cuenta que se pueda llegar a ella y que la distancia al nodo deseado se haya achicado, para así poder seguir llamando a esta función de ser necesario).
+
+Algo para plantearse es qué hacer cuando se agrega una plataforma liviana, ya que esto es agregar un nodo al digrafo. ¿Visito el nodo nuevo como si fuera un nodo normal intentando moverme hacia todas partes, construyendo nuevas aristas que no tienen que ver con el arreglo actual y metiendo más cosas a la lista de arreglos? ¿Hago eso mismo también para los nodos cercanos que puedan saltar al nodo nuevo? De no hacer alguna --o ambas-- quizás se construyan plataformas livianas redundantes, hay que pensarlo. Otra opción es usar escaleras, lo cual es mas sencillo al menos en este contexto ya que
+simplemente se conectan los nodos.
+
+Una optimización interesante a la lista de fixes es ordenarla por distancia entre nodos de (v,w) de menor a mayor. El razonamiento es que puede haber "escaleras" muy largas que quiero evitar construir, porque muy probablemente construyendo las escaleras mas chicas primero, me genere un camino entre esos nodos distantes que me evite tener que construir esa escalera grande, que claramente sería un detalle feo del mapa.
+
+Esto es solo el comienzo, todavia no se consideraron los casos donde hay por ejemplo "lava", o sea bloques no pisables
+por el jugador. Existiendo ese tipo de terrenos, pueden haber complicaciones, por ejemplo (siendo J el jugador y L los tiles de lava):
+
+***************     El algoritmo planteado no funciona en este caso porque no pueden generarse nodos encima de la lava,
+*             *     es necesario conectar los nodos mediante un puente.
+* J           *
+****       ****
+****       ****
+****       ****
+****LLLLLLL****
+****LLLLLLL****
+
+o peor aún:
+
+***************     Acá el jugador ni siquiera puede pisar un puente, ni llegar saltando al otro lado. Algo que se puede
+* J           *     hacer es sobreescribir los tiles de lava necesarios con el puente. Si el puente se cae tras unos 
+****LLLLLLL****     instantes y tras un cierto tiempo respawnea, puede funcionar y crear situaciones interesantes.
+****LLLLLLL****
+****LLLLLLL****
+****LLLLLLL****
+****LLLLLLL****
+
