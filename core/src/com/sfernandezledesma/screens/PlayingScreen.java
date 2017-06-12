@@ -28,6 +28,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.sfernandezledesma.Platformer;
 import com.sfernandezledesma.entities.DynamicEntity;
 import com.sfernandezledesma.entities.Hero;
+import com.sfernandezledesma.entities.OneWayPlatform;
 import com.sfernandezledesma.entities.StaticEntity;
 import com.sfernandezledesma.entities.World;
 import com.sfernandezledesma.physics.AABB;
@@ -44,6 +45,7 @@ public class PlayingScreen extends GameScreen {
     private boolean paused = true;
     private ShapeRenderer shapeRenderer = new ShapeRenderer();
     private Sprite wallSprite;
+    private Sprite oneWayPlatformSprite;
     private double vx = 0;
     private double vy = 0;
 
@@ -56,6 +58,7 @@ public class PlayingScreen extends GameScreen {
         camera.setToOrtho(false, viewport.getWorldWidth(), viewport.getWorldHeight());
         sprite = new Sprite(texture, 0, 96, 16, 16);
         wallSprite = new Sprite(texture, 16, 96, 16, 16);
+        oneWayPlatformSprite = new Sprite(texture, 32, 768, 16, 16);
         this.vx = -10;
         this.vy = vx;
 
@@ -87,15 +90,19 @@ public class PlayingScreen extends GameScreen {
         movingWall2 = new DynamicEntity(new AABB(288, 272, wallSprite.getWidth(), wallSprite.getHeight()), wallSprite, null);
         movingWall2.setVelocityX(vx);
         movingWall2.setVelocityY(vy);
+        for (int i = 0; i < 196; i += oneWayPlatformSprite.getWidth())
+            world.addStaticEntity(new OneWayPlatform(new AABB(i, 128, oneWayPlatformSprite.getWidth(), oneWayPlatformSprite.getHeight()), oneWayPlatformSprite, null));
         world.addDynamicEntity(hero);
         world.addDynamicEntity(movingWall2);
         world.addDynamicEntity(movingWall1);
     }
 
     private void testMovingWalls() {
+        AABB box = new AABB(0, 0, wallSprite.getWidth(), wallSprite.getHeight());
         for (int i = 8; i < 32; i++) {
             for (int j = 24; j > 5; j--) {
-                DynamicEntity movingWall = new DynamicEntity(new AABB(i * 16, j * 16, wallSprite.getWidth(), wallSprite.getHeight()), wallSprite, null);
+                box.setPosition(i * box.getWidth(), j * box.getHeight());
+                DynamicEntity movingWall = new DynamicEntity(box, wallSprite, null);
                 movingWall.setVelocityY(vy);
                 movingWall.setVelocityX(vx);
                 world.addDynamicEntity(movingWall);

@@ -1,5 +1,5 @@
 /*
- * StaticEntity.java
+ * OneWayPlatform.java
  * Copyright 2017 Sebastian Fernandez Ledesma
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,14 +22,13 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Vector2;
 import com.sfernandezledesma.physics.AABB;
 
-public class StaticEntity extends Entity {
-
-    public StaticEntity(AABB box, Sprite sprite, Vector2 offsetsSprite) {
+public class OneWayPlatform extends StaticEntity {
+    public OneWayPlatform(AABB box, Sprite sprite, Vector2 offsetsSprite) {
         super(box, sprite, offsetsSprite);
     }
 
     @Override
     public boolean onCollision(Entity entity, World world, float delta) {
-        return entity.onCollisionWithStaticEntity(this, world, delta);
+        return entity.onCollisionWithOneWayPlatform(this, world, delta);
     }
 }

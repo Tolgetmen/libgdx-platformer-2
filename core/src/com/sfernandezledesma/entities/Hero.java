@@ -29,6 +29,7 @@ public class Hero extends DynamicEntity {
     private double gravityAccel = 400;
     private double jumpVelocity = 200;
     private boolean isTouchingDown = false;
+    private boolean stepDown = false;
 
     public Hero(AABB box, Sprite sprite, Vector2 offsetsSprite) {
         super(box, sprite, offsetsSprite);
@@ -36,25 +37,36 @@ public class Hero extends DynamicEntity {
     }
 
     @Override
-    public boolean onCollisionWith(StaticEntity otherStaticEntity, World world, float delta) {
+    public boolean onCollisionWithStaticEntity(StaticEntity otherStaticEntity, World world, float delta) {
         updateTouchingDown(otherStaticEntity.box);
         return true;
     }
 
     @Override
-    public boolean onCollisionWith(DynamicEntity otherDynamicEntity, World world, float delta) {
+    public boolean onCollisionWithDynamicEntity(DynamicEntity otherDynamicEntity, World world, float delta) {
         updateTouchingDown(otherDynamicEntity.box);
-        return super.onCollisionWith(otherDynamicEntity, world, delta);
+        return super.onCollisionWithDynamicEntity(otherDynamicEntity, world, delta);
     }
 
-    private void updateTouchingDown(AABB otherBox) {
+    @Override
+    public boolean onCollisionWithOneWayPlatform(OneWayPlatform oneWayPlatform, World world, float delta) {
+        if (velocityY <= 0 && box.bottomSideY() >= oneWayPlatform.getBox().topSideY()) {
+            isTouchingDown = !stepDown;
+            return isTouchingDown;
+        } else {
+            return false;
+        }
+    }
+
+    private boolean updateTouchingDown(AABB otherBox) {
         if (velocityY <= 0 && box.bottomSideY() >= otherBox.topSideY())
             isTouchingDown = true;
+        return isTouchingDown;
     }
 
     @Override
     public boolean onCollision(Entity entity, World world, float delta) {
-        return entity.onCollisionWith(this, world, delta);
+        return entity.onCollisionWithHero(this, world, delta);
     }
 
     @Override
@@ -66,6 +78,11 @@ public class Hero extends DynamicEntity {
             setVelocityX(horizontalVelocity);
         if (Gdx.input.isKeyPressed(Input.Keys.UP) && isTouchingDown) {
             setVelocityY(jumpVelocity);
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.DOWN) && isTouchingDown) {
+            stepDown = true;
+        } else {
+            stepDown = false;
         }
     }
 

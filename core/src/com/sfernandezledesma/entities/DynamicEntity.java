@@ -48,11 +48,11 @@ public class DynamicEntity extends Entity {
 
     @Override
     public boolean onCollision(Entity entity, World world, float delta) {
-        return entity.onCollisionWith(this, world, delta);
+        return entity.onCollisionWithDynamicEntity(this, world, delta);
     }
 
     @Override
-    public boolean onCollisionWith(DynamicEntity otherDynamicEntity, World world, float delta) {
+    public boolean onCollisionWithDynamicEntity(DynamicEntity otherDynamicEntity, World world, float delta) {
         boolean ret = true;
         if (!otherDynamicEntity.isResolvingCollision) {
             otherDynamicEntity.moveAndCollide(world, delta); // Lets try to move the other entity, maybe we are not really colliding

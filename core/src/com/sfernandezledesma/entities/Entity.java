@@ -35,7 +35,7 @@ public abstract class Entity {
 
     public Entity(AABB box, Sprite sprite, Vector2 offsetsSprite) {
         assignId();
-        this.box = box;
+        this.box = new AABB(box);
         this.sprite = sprite; // For now lets assume all entities have a sprite
         if (offsetsSprite == null)
             this.offsetsSprite = new Vector2();
@@ -71,12 +71,12 @@ public abstract class Entity {
     }
 
     public boolean translateX(double dx) {
-        box.setX(box.getX() + dx);
+        box.translateX(dx);
         return quadtree.update(this);
     }
 
     public boolean translateY(double dy) {
-        box.setY(box.getY() + dy);
+        box.translateY(dy);
         return quadtree.update(this);
     }
 
@@ -92,9 +92,10 @@ public abstract class Entity {
     }
 
     public abstract boolean onCollision(Entity entity, World world, float delta);
-    public boolean onCollisionWith(DynamicEntity otherDynamicEntity, World world, float delta) { return true; }
-    public boolean onCollisionWith(StaticEntity otherStaticEntity, World world, float delta) { return true; }
-    public boolean onCollisionWith(Hero hero, World world, float delta) { return true; }
+    public boolean onCollisionWithDynamicEntity(DynamicEntity otherDynamicEntity, World world, float delta) { return true; }
+    public boolean onCollisionWithStaticEntity(StaticEntity otherStaticEntity, World world, float delta) { return true; }
+    public boolean onCollisionWithHero(Hero hero, World world, float delta) { return true; }
+    public boolean onCollisionWithOneWayPlatform(OneWayPlatform oneWayPlatform, World world, float delta) { return false; }
 
     public void render(SpriteBatch batch) {
         sprite.setPosition((float)getX() - getOffsetSpriteX(), (float)getY() - getOffsetSpriteY());
