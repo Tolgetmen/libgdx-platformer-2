@@ -18,18 +18,24 @@
 package com.sfernandezledesma.entities;
 
 
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.sfernandezledesma.graphics.GameSprite;
 import com.sfernandezledesma.physics.AABB;
 
 public class StaticEntity extends Entity {
 
-    public StaticEntity(AABB box, Sprite sprite, Vector2 offsetsSprite) {
-        super(box, sprite, offsetsSprite);
+    public StaticEntity(AABB box, GameSprite gameSprite, boolean centerPosition) {
+        super(box, gameSprite, centerPosition);
+        this.gameSprite.setPosition((float) getX(), (float) getY());
     }
 
     @Override
-    public boolean onCollision(Entity entity, World world, float delta) {
+    protected boolean resolveCollisionOf(Entity entity, World world, float delta) {
         return entity.onCollisionWithStaticEntity(this, world, delta);
+    }
+
+    @Override
+    public void render(SpriteBatch batch)  {
+        gameSprite.draw(batch);
     }
 }

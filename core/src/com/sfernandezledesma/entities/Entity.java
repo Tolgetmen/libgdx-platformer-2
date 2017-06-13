@@ -21,6 +21,7 @@ package com.sfernandezledesma.entities;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
+import com.sfernandezledesma.graphics.GameSprite;
 import com.sfernandezledesma.physics.AABB;
 import com.sfernandezledesma.physics.CollisionQuadtree;
 
@@ -28,19 +29,18 @@ public abstract class Entity {
     private static int next_id = 1;
     protected int myID;
     protected AABB box;
-    protected Sprite sprite;
-    protected Vector2 offsetsSprite;
+    protected GameSprite gameSprite;
     protected CollisionQuadtree quadtree = null;
     protected boolean toBeDestroyed = false;
 
-    public Entity(AABB box, Sprite sprite, Vector2 offsetsSprite) {
+    public Entity(AABB box, GameSprite gameSprite, boolean centerPosition) {
         assignId();
         this.box = new AABB(box);
-        this.sprite = sprite; // For now lets assume all entities have a sprite
-        if (offsetsSprite == null)
-            this.offsetsSprite = new Vector2();
-        else
-            this.offsetsSprite = offsetsSprite;
+        this.gameSprite = new GameSprite(gameSprite); // For now lets assume all entities have a sprite
+        if (centerPosition) {
+            this.box.translateX(gameSprite.getScreenOffsetX());
+            this.box.translateY(gameSprite.getScreenOffsetY());
+        }
     }
 
     protected void assignId() {
@@ -80,27 +80,32 @@ public abstract class Entity {
         return quadtree.update(this);
     }
 
-    private float getOffsetSpriteX() {
-        return offsetsSprite.x;
-    }
-
-    private float getOffsetSpriteY() {
-        return offsetsSprite.y;
-    }
-
     public void update(float delta) {
     }
 
-    public abstract boolean onCollision(Entity entity, World world, float delta);
-    public boolean onCollisionWithDynamicEntity(DynamicEntity otherDynamicEntity, World world, float delta) { return true; }
-    public boolean onCollisionWithStaticEntity(StaticEntity otherStaticEntity, World world, float delta) { return true; }
-    public boolean onCollisionWithHero(Hero hero, World world, float delta) { return true; }
-    public boolean onCollisionWithOneWayPlatform(OneWayPlatform oneWayPlatform, World world, float delta) { return false; }
+    protected abstract boolean resolveCollisionOf(Entity entity, World world, float delta);
 
-    public void render(SpriteBatch batch) {
-        sprite.setPosition((float)getX() - getOffsetSpriteX(), (float)getY() - getOffsetSpriteY());
-        sprite.draw(batch);
+    protected boolean onCollisionWithDynamicEntity(DynamicEntity otherDynamicEntity, World world, float delta) {
+        return true;
     }
+
+    protected boolean onCollisionWithStaticEntity(StaticEntity otherStaticEntity, World world, float delta) {
+        return true;
+    }
+
+    protected boolean onCollisionWithHero(Hero hero, World world, float delta) {
+        return true;
+    }
+
+    protected boolean onCollisionWithOneWayPlatform(OneWayPlatform oneWayPlatform, World world, float delta) {
+        return false;
+    }
+
+    protected boolean onCollisionWithLadder(Ladder ladder, World world, float delta) {
+        return false;
+    }
+
+    public abstract void render(SpriteBatch batch);
 
     public CollisionQuadtree getQuadtree() {
         return quadtree;

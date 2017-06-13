@@ -24,11 +24,6 @@ public class AABB {
     private double width;
     private double height;
 
-    /*public AABB(Vector2 position, Vector2 length) {
-        this.position = new Vector2(position);
-        this.length = new Vector2(length);
-    }*/
-
     public AABB(AABB other) {
         x = other.getX();
         y = other.getY();

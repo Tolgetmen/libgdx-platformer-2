@@ -18,8 +18,8 @@
 package com.sfernandezledesma.entities;
 
 
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.sfernandezledesma.graphics.GameSprite;
 import com.sfernandezledesma.physics.AABB;
 
 import java.util.List;
@@ -32,8 +32,8 @@ public class DynamicEntity extends Entity {
     protected boolean isResolvingCollision = false;
     protected AABB newBox;
 
-    public DynamicEntity(AABB box, Sprite sprite, Vector2 offsetsSprite) {
-        super(box, sprite, offsetsSprite);
+    public DynamicEntity(AABB box, GameSprite gameSprite, boolean centerPosition) {
+        super(box, gameSprite, centerPosition);
         newBox = new AABB(box);
     }
 
@@ -47,102 +47,97 @@ public class DynamicEntity extends Entity {
     }
 
     @Override
-    public boolean onCollision(Entity entity, World world, float delta) {
+    protected boolean resolveCollisionOf(Entity entity, World world, float delta) {
         return entity.onCollisionWithDynamicEntity(this, world, delta);
     }
 
     @Override
-    public boolean onCollisionWithDynamicEntity(DynamicEntity otherDynamicEntity, World world, float delta) {
-        boolean ret = true;
-        if (!otherDynamicEntity.isResolvingCollision) {
-            otherDynamicEntity.moveAndCollide(world, delta); // Lets try to move the other entity, maybe we are not really colliding
-            ret = newBox.overlapsWith(otherDynamicEntity.box); // We return true if we are still colliding
-        }
-        return ret;
+    protected boolean onCollisionWithDynamicEntity(DynamicEntity otherDynamicEntity, World world, float delta) {
+        otherDynamicEntity.moveAndCollide(world, delta); // Lets try to move the other entity, maybe we are not really colliding
+        return newBox.overlapsWith(otherDynamicEntity.box); // We return true if we are still colliding
     }
 
-    public boolean moveAndCollide(World world, float delta) {
+    @Override
+    public void render(SpriteBatch batch)  {
+        gameSprite.setPosition((float) getX(), (float) getY());
+        gameSprite.draw(batch);
+    }
+
+    public void moveAndCollide(World world, float delta) {
+        if (isResolvingCollision)
+            return;
         //Gdx.app.log("COLLISION INFO", "Moving entity " + this.myID);
         setResolvingCollision(true);
         // First we try to move horizontally
-        if (!moveAndCollideHorizontally(world, delta))
-            return false;
+        moveAndCollideHorizontally(world, delta);
         // Now we try moving vertically
-        return moveAndCollideVertically(world, delta);
+        moveAndCollideVertically(world, delta);
     }
 
-    // Moves horizontally colliding with other entities. Returns false if out of the world.
-    private boolean moveAndCollideHorizontally(World world, float delta) {
-        boolean ret = true;
-        if (velocityX != 0) {
-            double dx = velocityX * delta;
-            newBox.syncPositionWith(box);
-            newBox.translateX(dx);
-            double minimumCollidingLeftSideX = Double.MAX_VALUE;
-            double maximumCollidingRightSideX = -Double.MAX_VALUE;
-            boolean collidesWithSomething = false;
-            List<Entity> entitiesToCollide = quadtree.getPossibleCollidingEntities(newBox);
-            for (Entity otherEntity : entitiesToCollide) {
-                if (otherEntity.equals(this))
-                    continue;
-                if (newBox.overlapsWith(otherEntity.getBox())) {
-                    if (otherEntity.onCollision(this, world, delta)) {
-                        collidesWithSomething = true;
-                        minimumCollidingLeftSideX = Math.min(minimumCollidingLeftSideX, otherEntity.getBox().leftSideX());
-                        maximumCollidingRightSideX = Math.max(maximumCollidingRightSideX, otherEntity.getBox().rightSideX());
-                    }
+    // Moves horizontally colliding with other entities.
+    private void moveAndCollideHorizontally(World world, float delta) {
+        double dx = velocityX * delta;
+        newBox.syncPositionWith(box);
+        newBox.translateX(dx);
+        double minimumCollidingLeftSideX = Double.MAX_VALUE;
+        double maximumCollidingRightSideX = -Double.MAX_VALUE;
+        boolean collidesWithSomething = false;
+        List<Entity> entitiesToCollide = quadtree.getPossibleCollidingEntities(newBox);
+        for (Entity otherEntity : entitiesToCollide) {
+            if (otherEntity.equals(this))
+                continue;
+            if (newBox.overlapsWith(otherEntity.getBox())) {
+                if (otherEntity.resolveCollisionOf(this, world, delta)) {
+                    collidesWithSomething = true;
+                    minimumCollidingLeftSideX = Math.min(minimumCollidingLeftSideX, otherEntity.getBox().leftSideX());
+                    maximumCollidingRightSideX = Math.max(maximumCollidingRightSideX, otherEntity.getBox().rightSideX());
                 }
-            }
-            if (collidesWithSomething) { // We fix its position and keep the invariant
-                //Gdx.app.log("COLLISION INFO", "Collided horizontally.");
-                if (velocityX > 0) { // The entity was colliding to the other from the left
-                    ret = setX(minimumCollidingLeftSideX - box.getWidth());
-                } else { // The entity was colliding from the right
-                    ret = setX(maximumCollidingRightSideX);
-                }
-                velocityX = 0;
-            } else {
-                ret = setX(newBox.getX());
             }
         }
-        return ret;
+        if (collidesWithSomething) { // We fix its position and keep the invariant
+            //Gdx.app.log("COLLISION INFO", "Collided horizontally.");
+            if (velocityX > 0) { // The entity was colliding to the other from the left
+                setX(minimumCollidingLeftSideX - box.getWidth());
+            } else { // The entity was colliding from the right
+                setX(maximumCollidingRightSideX);
+            }
+            velocityX = 0;
+        } else {
+            setX(newBox.getX());
+        }
     }
 
-    // Moves vertically colliding with other entities. Returns false if out of the world.
-    private boolean moveAndCollideVertically(World world, float delta) {
-        boolean ret = true;
-        if (velocityY != 0) {
-            double dy = velocityY * delta;
-            newBox.syncPositionWith(box);
-            newBox.translateY(dy);
-            double minimumCollidingBottomSideY = Double.MAX_VALUE;
-            double maximumCollidingTopSideY = -Double.MAX_VALUE;
-            boolean collidesWithSomething = false;
-            List<Entity> entitiesToCollide = quadtree.getPossibleCollidingEntities(newBox);
-            for (Entity otherEntity : entitiesToCollide) {
-                if (otherEntity.equals(this))
-                    continue;
-                if (newBox.overlapsWith(otherEntity.getBox())) {
-                    if (otherEntity.onCollision(this, world, delta)) {
-                        collidesWithSomething = true;
-                        minimumCollidingBottomSideY = Math.min(minimumCollidingBottomSideY, otherEntity.getBox().bottomSideY());
-                        maximumCollidingTopSideY = Math.max(maximumCollidingTopSideY, otherEntity.getBox().topSideY());
-                    }
+    // Moves vertically colliding with other entities.
+    private void moveAndCollideVertically(World world, float delta) {
+        double dy = velocityY * delta;
+        newBox.syncPositionWith(box);
+        newBox.translateY(dy);
+        double minimumCollidingBottomSideY = Double.MAX_VALUE;
+        double maximumCollidingTopSideY = -Double.MAX_VALUE;
+        boolean collidesWithSomething = false;
+        List<Entity> entitiesToCollide = quadtree.getPossibleCollidingEntities(newBox);
+        for (Entity otherEntity : entitiesToCollide) {
+            if (otherEntity.equals(this))
+                continue;
+            if (newBox.overlapsWith(otherEntity.getBox())) {
+                if (otherEntity.resolveCollisionOf(this, world, delta)) {
+                    collidesWithSomething = true;
+                    minimumCollidingBottomSideY = Math.min(minimumCollidingBottomSideY, otherEntity.getBox().bottomSideY());
+                    maximumCollidingTopSideY = Math.max(maximumCollidingTopSideY, otherEntity.getBox().topSideY());
                 }
-            }
-            if (collidesWithSomething) { // We fix its position and keep the invariant
-                //Gdx.app.log("COLLISION INFO", "Collided vertically.");
-                if (velocityY > 0) { // The entity was colliding to the other from below
-                    ret = setY(minimumCollidingBottomSideY - box.getHeight());
-                } else { // The entity was colliding from above
-                    ret = setY(maximumCollidingTopSideY);
-                }
-                velocityY = 0;
-            } else {
-                ret = setY(newBox.getY());
             }
         }
-        return ret;
+        if (collidesWithSomething) { // We fix its position and keep the invariant
+            //Gdx.app.log("COLLISION INFO", "Collided vertically.");
+            if (velocityY > 0) { // The entity was colliding to the other from below
+                setY(minimumCollidingBottomSideY - box.getHeight());
+            } else { // The entity was colliding from above
+                setY(maximumCollidingTopSideY);
+            }
+            velocityY = 0;
+        } else {
+            setY(newBox.getY());
+        }
     }
 
     public void setVelocityX(double vx) {
@@ -168,4 +163,5 @@ public class DynamicEntity extends Entity {
     public void setResolvingCollision(boolean resolvingCollision) {
         isResolvingCollision = resolvingCollision;
     }
+
 }

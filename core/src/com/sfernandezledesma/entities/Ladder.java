@@ -1,5 +1,5 @@
 /*
- * OneWayPlatform.java
+ * Ladder.java
  * Copyright 2017 Sebastian Fernandez Ledesma
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,18 +18,16 @@
 package com.sfernandezledesma.entities;
 
 
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.math.Vector2;
 import com.sfernandezledesma.graphics.GameSprite;
 import com.sfernandezledesma.physics.AABB;
 
-public class OneWayPlatform extends StaticEntity {
-    public OneWayPlatform(AABB box, GameSprite gameSprite, boolean centerPosition) {
+public class Ladder extends StaticEntity {
+    public Ladder(AABB box, GameSprite gameSprite, boolean centerPosition) {
         super(box, gameSprite, centerPosition);
     }
 
     @Override
     protected boolean resolveCollisionOf(Entity entity, World world, float delta) {
-        return entity.onCollisionWithOneWayPlatform(this, world, delta);
+        return entity.onCollisionWithLadder(this, world, delta);
     }
 }

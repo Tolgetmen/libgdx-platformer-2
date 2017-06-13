@@ -59,9 +59,7 @@ public class World {
 
         for (DynamicEntity e : dynamicEntities) {
             // Invariant: All rigid entities are NOT colliding, we have to keep that invariant before each moveAndCollide
-            if (!e.isResolvingCollision()) {
-                e.moveAndCollide(this, delta);
-            }
+            e.moveAndCollide(this, delta);
         }
 
         Iterator<DynamicEntity> it = dynamicEntities.iterator();

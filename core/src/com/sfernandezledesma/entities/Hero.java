@@ -22,40 +22,50 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Vector2;
+import com.sfernandezledesma.graphics.GameSprite;
 import com.sfernandezledesma.physics.AABB;
 
 public class Hero extends DynamicEntity {
     private double horizontalVelocity = 100;
+    private double verticalVelocity = 100;
     private double gravityAccel = 400;
     private double jumpVelocity = 200;
     private boolean isTouchingDown = false;
     private boolean stepDown = false;
+    private boolean climbingLadder = false;
+    private boolean collidingWithLadder = false;
 
-    public Hero(AABB box, Sprite sprite, Vector2 offsetsSprite) {
-        super(box, sprite, offsetsSprite);
+    public Hero(AABB box, GameSprite gameSprite, boolean centerPosition) {
+        super(box, gameSprite, centerPosition);
         setAccelerationY(-gravityAccel);
     }
 
     @Override
-    public boolean onCollisionWithStaticEntity(StaticEntity otherStaticEntity, World world, float delta) {
+    protected boolean onCollisionWithStaticEntity(StaticEntity otherStaticEntity, World world, float delta) {
         updateTouchingDown(otherStaticEntity.box);
         return true;
     }
 
     @Override
-    public boolean onCollisionWithDynamicEntity(DynamicEntity otherDynamicEntity, World world, float delta) {
+    protected boolean onCollisionWithDynamicEntity(DynamicEntity otherDynamicEntity, World world, float delta) {
         updateTouchingDown(otherDynamicEntity.box);
         return super.onCollisionWithDynamicEntity(otherDynamicEntity, world, delta);
     }
 
     @Override
-    public boolean onCollisionWithOneWayPlatform(OneWayPlatform oneWayPlatform, World world, float delta) {
+    protected boolean onCollisionWithOneWayPlatform(OneWayPlatform oneWayPlatform, World world, float delta) {
         if (velocityY <= 0 && box.bottomSideY() >= oneWayPlatform.getBox().topSideY()) {
             isTouchingDown = !stepDown;
             return isTouchingDown;
         } else {
             return false;
         }
+    }
+
+    @Override
+    protected boolean onCollisionWithLadder(Ladder ladder, World world, float delta) {
+        collidingWithLadder = true;
+        return false;
     }
 
     private boolean updateTouchingDown(AABB otherBox) {
@@ -65,21 +75,37 @@ public class Hero extends DynamicEntity {
     }
 
     @Override
-    public boolean onCollision(Entity entity, World world, float delta) {
+    protected boolean resolveCollisionOf(Entity entity, World world, float delta) {
         return entity.onCollisionWithHero(this, world, delta);
     }
 
     @Override
     public void handleInput() {
+        if (!collidingWithLadder)
+            climbingLadder = false;
+
         setVelocityX(0);
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT))
             setVelocityX(-horizontalVelocity);
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT))
             setVelocityX(horizontalVelocity);
-        if (Gdx.input.isKeyPressed(Input.Keys.UP) && isTouchingDown) {
+        if (Gdx.input.isKeyPressed(Input.Keys.Z) && (isTouchingDown || climbingLadder)) {
             setVelocityY(jumpVelocity);
+            climbingLadder = false;
         }
-        if (Gdx.input.isKeyPressed(Input.Keys.DOWN) && isTouchingDown) {
+
+        if (climbingLadder)
+            setVelocityY(0);
+
+        if (Gdx.input.isKeyPressed(Input.Keys.UP) && collidingWithLadder) {
+            setVelocityY(verticalVelocity);
+            climbingLadder = true;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+            if (collidingWithLadder) {
+                setVelocityY(-verticalVelocity);
+                climbingLadder = true;
+            }
             stepDown = true;
         } else {
             stepDown = false;
@@ -88,7 +114,9 @@ public class Hero extends DynamicEntity {
 
     @Override
     public void update(float delta) {
-        super.update(delta);
+        if (!climbingLadder)
+            super.update(delta);
         isTouchingDown = false;
+        collidingWithLadder = false;
     }
 }

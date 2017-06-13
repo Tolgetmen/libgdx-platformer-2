@@ -24,28 +24,33 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.sfernandezledesma.Platformer;
 import com.sfernandezledesma.entities.DynamicEntity;
 import com.sfernandezledesma.entities.Hero;
+import com.sfernandezledesma.entities.Ladder;
 import com.sfernandezledesma.entities.OneWayPlatform;
 import com.sfernandezledesma.entities.StaticEntity;
 import com.sfernandezledesma.entities.World;
+import com.sfernandezledesma.graphics.GameSprite;
 import com.sfernandezledesma.physics.AABB;
 
 
 public class PlayingScreen extends GameScreen {
+    private FPSLogger fpsLogger = new FPSLogger();
+    private ShapeRenderer shapeRenderer = new ShapeRenderer();
+
     private Texture texture;
-    private Sprite sprite;
+    private GameSprite heroSprite;
+    private GameSprite wallSprite;
+    private GameSprite oneWayPlatformSprite;
+    private GameSprite ladderSprite;
+
     private Hero hero;
     private World world;
-    private DynamicEntity movingWall1;
-    private DynamicEntity movingWall2;
-    FPSLogger fpsLogger = new FPSLogger();
     private boolean paused = true;
-    private ShapeRenderer shapeRenderer = new ShapeRenderer();
-    private Sprite wallSprite;
-    private Sprite oneWayPlatformSprite;
+
     private double vx = 0;
     private double vy = 0;
 
@@ -56,9 +61,10 @@ public class PlayingScreen extends GameScreen {
         camera = new OrthographicCamera();
         viewport = new FitViewport(Platformer.getWindowWidth() / 2, Platformer.getWindowHeight() / 2, camera);
         camera.setToOrtho(false, viewport.getWorldWidth(), viewport.getWorldHeight());
-        sprite = new Sprite(texture, 0, 96, 16, 16);
-        wallSprite = new Sprite(texture, 16, 96, 16, 16);
-        oneWayPlatformSprite = new Sprite(texture, 32, 768, 16, 16);
+        heroSprite = new GameSprite(texture, 416, 16, 16, 16, 3, 0);
+        wallSprite = new GameSprite(texture, 16, 96, 16, 16, 0, 0);
+        oneWayPlatformSprite = new GameSprite(texture, 32, 768, 16, 16, 0, 0);
+        ladderSprite = new GameSprite(texture, 0, 192, 16, 16, 1, 0);
         this.vx = -10;
         this.vy = vx;
 
@@ -69,29 +75,32 @@ public class PlayingScreen extends GameScreen {
 
     private void testPlayground() {
         for (int i = 0; i < 256; i += 16) {
-            world.addStaticEntity(new StaticEntity(new AABB(i, 0, wallSprite.getWidth(), wallSprite.getHeight()), wallSprite, null));
+            world.addStaticEntity(new StaticEntity(new AABB(i, 0, wallSprite.getWidth(), wallSprite.getHeight()), wallSprite, true));
         }
         for (int i = 0; i < 192; i += 16) {
-            world.addStaticEntity(new StaticEntity(new AABB(i, 48, wallSprite.getWidth(), wallSprite.getHeight()), wallSprite, null));
+            world.addStaticEntity(new StaticEntity(new AABB(i, 48, wallSprite.getWidth(), wallSprite.getHeight()), wallSprite, true));
         }
         for (int i = 272; i < 512; i += 16) {
-            world.addStaticEntity(new StaticEntity(new AABB(i, 48, wallSprite.getWidth(), wallSprite.getHeight()), wallSprite, null));
+            world.addStaticEntity(new StaticEntity(new AABB(i, 48, wallSprite.getWidth(), wallSprite.getHeight()), wallSprite, true));
         }
         for (int i = 128; i < 240; i += 16) {
-            world.addStaticEntity(new StaticEntity(new AABB(i, 96, wallSprite.getWidth(), wallSprite.getHeight()), wallSprite, null));
+            world.addStaticEntity(new StaticEntity(new AABB(i, 96, wallSprite.getWidth(), wallSprite.getHeight()), wallSprite, true));
         }
         for (int i = 0; i < 512; i += 16) {
-            world.addStaticEntity(new StaticEntity(new AABB(i, 0, wallSprite.getWidth(), wallSprite.getHeight()), wallSprite, null));
+            world.addStaticEntity(new StaticEntity(new AABB(i, 0, wallSprite.getWidth(), wallSprite.getHeight()), wallSprite, true));
         }
-        hero = new Hero(new AABB(128, 350, sprite.getWidth(), sprite.getHeight()), sprite, null);
-        movingWall1 = new DynamicEntity(new AABB(272, 272, wallSprite.getWidth(), wallSprite.getHeight()), wallSprite, null);
+        for (int i = 64; i < 112; i += 16) {
+            world.addStaticEntity(new Ladder(new AABB(112, i, ladderSprite.getWidth(), ladderSprite.getHeight()), ladderSprite, true));
+        }
+        hero = new Hero(new AABB(128, 350, 10, 16), heroSprite, true);
+        DynamicEntity movingWall1 = new DynamicEntity(new AABB(272, 272, wallSprite.getWidth(), wallSprite.getHeight()), wallSprite, true);
         movingWall1.setVelocityX(vx);
         movingWall1.setVelocityY(vy);
-        movingWall2 = new DynamicEntity(new AABB(288, 272, wallSprite.getWidth(), wallSprite.getHeight()), wallSprite, null);
+        DynamicEntity movingWall2 = new DynamicEntity(new AABB(288, 272, wallSprite.getWidth(), wallSprite.getHeight()), wallSprite, true);
         movingWall2.setVelocityX(vx);
         movingWall2.setVelocityY(vy);
         for (int i = 0; i < 196; i += oneWayPlatformSprite.getWidth())
-            world.addStaticEntity(new OneWayPlatform(new AABB(i, 128, oneWayPlatformSprite.getWidth(), oneWayPlatformSprite.getHeight()), oneWayPlatformSprite, null));
+            world.addStaticEntity(new OneWayPlatform(new AABB(i, 128, oneWayPlatformSprite.getWidth(), oneWayPlatformSprite.getHeight()), oneWayPlatformSprite, true));
         world.addDynamicEntity(hero);
         world.addDynamicEntity(movingWall2);
         world.addDynamicEntity(movingWall1);
@@ -102,7 +111,7 @@ public class PlayingScreen extends GameScreen {
         for (int i = 8; i < 32; i++) {
             for (int j = 24; j > 5; j--) {
                 box.setPosition(i * box.getWidth(), j * box.getHeight());
-                DynamicEntity movingWall = new DynamicEntity(box, wallSprite, null);
+                DynamicEntity movingWall = new DynamicEntity(box, wallSprite, true);
                 movingWall.setVelocityY(vy);
                 movingWall.setVelocityX(vx);
                 world.addDynamicEntity(movingWall);
