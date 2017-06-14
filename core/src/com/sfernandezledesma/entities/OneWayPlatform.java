@@ -18,10 +18,9 @@
 package com.sfernandezledesma.entities;
 
 
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.math.Vector2;
 import com.sfernandezledesma.graphics.GameSprite;
 import com.sfernandezledesma.physics.AABB;
+import com.sfernandezledesma.world.World;
 
 public class OneWayPlatform extends StaticEntity {
     public OneWayPlatform(AABB box, GameSprite gameSprite, boolean centerPosition) {

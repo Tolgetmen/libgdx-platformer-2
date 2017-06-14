@@ -21,6 +21,7 @@ package com.sfernandezledesma.entities;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.sfernandezledesma.graphics.GameSprite;
 import com.sfernandezledesma.physics.AABB;
+import com.sfernandezledesma.world.World;
 
 public class StaticEntity extends Entity {
 

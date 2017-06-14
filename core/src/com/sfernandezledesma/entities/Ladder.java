@@ -20,6 +20,7 @@ package com.sfernandezledesma.entities;
 
 import com.sfernandezledesma.graphics.GameSprite;
 import com.sfernandezledesma.physics.AABB;
+import com.sfernandezledesma.world.World;
 
 public class Ladder extends StaticEntity {
     public Ladder(AABB box, GameSprite gameSprite, boolean centerPosition) {

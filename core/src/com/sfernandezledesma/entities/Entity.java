@@ -18,13 +18,11 @@
 package com.sfernandezledesma.entities;
 
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Vector2;
 import com.sfernandezledesma.graphics.GameSprite;
 import com.sfernandezledesma.physics.AABB;
 import com.sfernandezledesma.physics.CollisionQuadtree;
+import com.sfernandezledesma.world.World;
 
 public abstract class Entity {
     private static int next_id = 1;
@@ -80,9 +78,6 @@ public abstract class Entity {
     public boolean translateY(double dy) {
         box.translateY(dy);
         return quadtree.update(this);
-    }
-
-    public void update(float delta) {
     }
 
     protected abstract boolean resolveCollisionOf(Entity entity, World world, float delta);

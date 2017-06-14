@@ -20,10 +20,9 @@ package com.sfernandezledesma.entities;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.math.Vector2;
 import com.sfernandezledesma.graphics.GameSprite;
 import com.sfernandezledesma.physics.AABB;
+import com.sfernandezledesma.world.World;
 
 public class Hero extends DynamicEntity {
     private double horizontalVelocity = 100;
@@ -33,7 +32,7 @@ public class Hero extends DynamicEntity {
     private boolean isTouchingDown = false;
     private boolean stepDown = false;
     private boolean climbingLadder = false;
-    private boolean collidingWithLadder = false;
+    private boolean onLadder = false;
 
     public Hero(AABB box, GameSprite gameSprite, boolean centerPosition) {
         super(box, gameSprite, centerPosition);
@@ -67,18 +66,20 @@ public class Hero extends DynamicEntity {
         boolean ret;
         if (climbingLadder)
             ret = false;
-        else if ((velocityY <= 0 && box.bottomSideY() >= ladder.getBox().topSideY()) && !collidingWithLadder) { // Evaluating !collidingWithLadder works because we always move horizontally first, so we will only collide from above with the top section of the ladder
+        else if ((velocityY <= 0 && box.bottomSideY() >= ladder.getBox().topSideY()) && !onLadder) { // Evaluating !onLadder works because we always move horizontally first, so we will only collide from above with the top section of the ladder
             isTouchingDown = true;
             ret = true;
         } else
             ret = false;
-        collidingWithLadder = true;
+        onLadder = true;
         return ret;
     }
 
     private boolean updateTouchingDown(AABB otherBox) {
         if (velocityY <= 0 && box.bottomSideY() >= otherBox.topSideY()) {
             isTouchingDown = true;
+        } else if (velocityY > 0) {
+            isTouchingDown = false;
         }
         return isTouchingDown;
     }
@@ -88,11 +89,7 @@ public class Hero extends DynamicEntity {
         return entity.onCollisionWithHero(this, world, delta);
     }
 
-    @Override
-    public void handleInput() {
-        if (!collidingWithLadder)
-            climbingLadder = false;
-
+    private void handleInput() {
         setVelocityX(0);
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT))
             setVelocityX(-horizontalVelocity);
@@ -106,26 +103,36 @@ public class Hero extends DynamicEntity {
         if (climbingLadder)
             setVelocityY(0);
 
-        if (Gdx.input.isKeyPressed(Input.Keys.UP) && collidingWithLadder) {
+        if (Gdx.input.isKeyPressed(Input.Keys.UP) && onLadder) {
             setVelocityY(verticalVelocity);
             climbingLadder = true;
         }
         if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-            if (collidingWithLadder) {
+            if (onLadder) {
                 setVelocityY(-verticalVelocity);
                 climbingLadder = true;
             }
             stepDown = true;
-        } else {
-            stepDown = false;
         }
     }
 
     @Override
-    public void update(float delta) {
-        if (!climbingLadder)
-            super.update(delta);
-        isTouchingDown = false;
-        collidingWithLadder = false;
+    protected void updateBeforeMoving(float delta) {
+        handleInput();
+        if (!climbingLadder) {
+            super.updateBeforeMoving(delta);
+        }
+        onLadder = false;
+    }
+
+    @Override
+    protected void updateAfterMoving(boolean collidedHorizontally, boolean collidedVertically, float delta) {
+        stepDown = false;
+        if (!collidedVertically) {
+            isTouchingDown = false;
+        }
+        if (!onLadder) {
+            climbingLadder = false;
+        }
     }
 }

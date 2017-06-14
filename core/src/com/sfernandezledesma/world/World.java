@@ -15,11 +15,14 @@
  * limitations under the License.
  */
 
-package com.sfernandezledesma.entities;
+package com.sfernandezledesma.world;
 
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.sfernandezledesma.entities.DynamicEntity;
+import com.sfernandezledesma.entities.Entity;
+import com.sfernandezledesma.entities.StaticEntity;
 import com.sfernandezledesma.physics.AABB;
 import com.sfernandezledesma.physics.CollisionQuadtree;
 
@@ -51,15 +54,8 @@ public class World {
     }
 
     public void update(float delta) {
-        // First we update the dynamic entities (this updates velocities, accelerations, etc)
         for (DynamicEntity e : dynamicEntities) {
-            e.handleInput();
-            e.update(delta);
-        }
-
-        for (DynamicEntity e : dynamicEntities) {
-            // Invariant: All rigid entities are NOT colliding, we have to keep that invariant before each moveAndCollide
-            e.moveAndCollide(this, delta);
+            e.update(this, delta);
         }
 
         Iterator<DynamicEntity> it = dynamicEntities.iterator();
@@ -68,7 +64,7 @@ public class World {
             if (e.isToBeDestroyed()) {
                 it.remove();
             } else {
-                e.setResolvingCollision(false);
+                e.setUpdating(false);
             }
         }
         // If static objects are being destroyed by the quadtree, something is wrong.

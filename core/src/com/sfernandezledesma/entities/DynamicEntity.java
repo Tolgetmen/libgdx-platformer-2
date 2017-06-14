@@ -18,10 +18,10 @@
 package com.sfernandezledesma.entities;
 
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.sfernandezledesma.graphics.GameSprite;
 import com.sfernandezledesma.physics.AABB;
+import com.sfernandezledesma.world.World;
 
 import java.util.List;
 
@@ -30,21 +30,12 @@ public class DynamicEntity extends Entity {
     protected double velocityY = 0;
     protected double accelerationX = 0;
     protected double accelerationY = 0;
-    protected boolean isResolvingCollision = false;
+    protected boolean updating = false;
     protected AABB newBox;
 
     public DynamicEntity(AABB box, GameSprite gameSprite, boolean centerPosition) {
         super(box, gameSprite, centerPosition);
         newBox = new AABB(box);
-    }
-
-    public void handleInput() {
-    }
-
-    @Override
-    public void update(float delta) {
-        velocityX += accelerationX * delta;
-        velocityY += accelerationY * delta;
     }
 
     @Override
@@ -54,7 +45,7 @@ public class DynamicEntity extends Entity {
 
     @Override
     protected boolean onCollisionWithDynamicEntity(DynamicEntity otherDynamicEntity, World world, float delta) {
-        otherDynamicEntity.moveAndCollide(world, delta); // Lets try to move the other entity, maybe we are not really colliding
+        otherDynamicEntity.update(world, delta); // Lets try to move the other entity, maybe we are not really colliding
         return newBox.overlapsWith(otherDynamicEntity.box); // We return true if we are still colliding
     }
 
@@ -64,19 +55,33 @@ public class DynamicEntity extends Entity {
         gameSprite.draw(batch);
     }
 
-    public void moveAndCollide(World world, float delta) {
-        if (isResolvingCollision)
+    // This is called inside update, before moving the entity
+    protected void updateBeforeMoving(float delta) {
+        velocityX += accelerationX * delta;
+        velocityY += accelerationY * delta;
+    }
+
+    // This is called inside update, after moving the entity
+    protected void updateAfterMoving(boolean collidedHorizontally, boolean collidedVertically, float delta) {
+    }
+
+    // Invariant: All rigid entities are NOT colliding, we have to keep that invariant after each update
+    public void update(World world, float delta) {
+        if (updating)
             return;
-        //Gdx.app.log("COLLISION INFO", "Moving entity " + this.myID);
-        setResolvingCollision(true);
-        // First we try to move horizontally
-        moveAndCollideHorizontally(world, delta);
-        // Now we try moving vertically
-        moveAndCollideVertically(world, delta);
+        setUpdating(true);
+        // First we update velocities, handle input, etc
+        updateBeforeMoving(delta);
+        // Now we try to move horizontally
+        boolean collidedHorizontally = moveAndCollideHorizontally(world, delta);
+        // Now we try to move vertically
+        boolean collidedVertically = moveAndCollideVertically(world, delta);
+        // Finally we update the entity after it moved
+        updateAfterMoving(collidedHorizontally, collidedVertically, delta);
     }
 
     // Moves horizontally colliding with other entities.
-    private void moveAndCollideHorizontally(World world, float delta) {
+    private boolean moveAndCollideHorizontally(World world, float delta) {
         double dx = velocityX * delta;
         newBox.syncPositionWith(box);
         newBox.translateX(dx);
@@ -107,10 +112,11 @@ public class DynamicEntity extends Entity {
         } else {
             setX(newBox.getX());
         }
+        return collidesWithSomething;
     }
 
     // Moves vertically colliding with other entities.
-    private void moveAndCollideVertically(World world, float delta) {
+    private boolean moveAndCollideVertically(World world, float delta) {
         double dy = velocityY * delta;
         newBox.syncPositionWith(box);
         newBox.translateY(dy);
@@ -141,6 +147,7 @@ public class DynamicEntity extends Entity {
         } else {
             setY(newBox.getY());
         }
+        return collidesWithSomething;
     }
 
     public void setVelocityX(double vx) {
@@ -159,12 +166,12 @@ public class DynamicEntity extends Entity {
         accelerationY = ay;
     }
 
-    public boolean isResolvingCollision() {
-        return isResolvingCollision;
+    public boolean isUpdating() {
+        return updating;
     }
 
-    public void setResolvingCollision(boolean resolvingCollision) {
-        isResolvingCollision = resolvingCollision;
+    public void setUpdating(boolean updating) {
+        this.updating = updating;
     }
 
 }

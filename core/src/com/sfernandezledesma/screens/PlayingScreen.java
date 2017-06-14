@@ -22,9 +22,7 @@ import com.badlogic.gdx.graphics.FPSLogger;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.sfernandezledesma.Platformer;
 import com.sfernandezledesma.entities.DynamicEntity;
@@ -32,7 +30,7 @@ import com.sfernandezledesma.entities.Hero;
 import com.sfernandezledesma.entities.Ladder;
 import com.sfernandezledesma.entities.OneWayPlatform;
 import com.sfernandezledesma.entities.StaticEntity;
-import com.sfernandezledesma.entities.World;
+import com.sfernandezledesma.world.World;
 import com.sfernandezledesma.graphics.GameSprite;
 import com.sfernandezledesma.physics.AABB;
 
