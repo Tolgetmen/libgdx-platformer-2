@@ -18,6 +18,7 @@
 package com.sfernandezledesma.entities;
 
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.sfernandezledesma.graphics.GameSprite;
 import com.sfernandezledesma.physics.AABB;
@@ -83,6 +84,7 @@ public class DynamicEntity extends Entity {
         double maximumCollidingRightSideX = -Double.MAX_VALUE;
         boolean collidesWithSomething = false;
         List<Entity> entitiesToCollide = quadtree.getPossibleCollidingEntities(newBox);
+        //Gdx.app.log("DYNAMIC ENTITY", "Checking collision with " + entitiesToCollide.size() + " possible entities.");
         for (Entity otherEntity : entitiesToCollide) {
             if (otherEntity.equals(this))
                 continue;
@@ -116,6 +118,7 @@ public class DynamicEntity extends Entity {
         double maximumCollidingTopSideY = -Double.MAX_VALUE;
         boolean collidesWithSomething = false;
         List<Entity> entitiesToCollide = quadtree.getPossibleCollidingEntities(newBox);
+        //Gdx.app.log("DYNAMIC ENTITY", "Checking collision with " + entitiesToCollide.size() + " possible entities.");
         for (Entity otherEntity : entitiesToCollide) {
             if (otherEntity.equals(this))
                 continue;

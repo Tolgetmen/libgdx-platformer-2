@@ -18,6 +18,7 @@
 package com.sfernandezledesma.entities;
 
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
@@ -41,6 +42,7 @@ public abstract class Entity {
             this.box.translateX(gameSprite.getScreenOffsetX());
             this.box.translateY(gameSprite.getScreenOffsetY());
         }
+        //Gdx.app.log("ENTITY INFO", "Created entity " + myID);
     }
 
     protected void assignId() {
@@ -136,6 +138,10 @@ public abstract class Entity {
 
     @Override
     public int hashCode() {
+        return myID;
+    }
+
+    public int getID() {
         return myID;
     }
 }

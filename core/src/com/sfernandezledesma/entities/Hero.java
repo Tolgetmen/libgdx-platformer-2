@@ -64,13 +64,22 @@ public class Hero extends DynamicEntity {
 
     @Override
     protected boolean onCollisionWithLadder(Ladder ladder, World world, float delta) {
+        boolean ret;
+        if (climbingLadder)
+            ret = false;
+        else if ((velocityY <= 0 && box.bottomSideY() >= ladder.getBox().topSideY()) && !collidingWithLadder) { // Evaluating !collidingWithLadder works because we always move horizontally first, so we will only collide from above with the top section of the ladder
+            isTouchingDown = true;
+            ret = true;
+        } else
+            ret = false;
         collidingWithLadder = true;
-        return false;
+        return ret;
     }
 
     private boolean updateTouchingDown(AABB otherBox) {
-        if (velocityY <= 0 && box.bottomSideY() >= otherBox.topSideY())
+        if (velocityY <= 0 && box.bottomSideY() >= otherBox.topSideY()) {
             isTouchingDown = true;
+        }
         return isTouchingDown;
     }
 
@@ -89,7 +98,7 @@ public class Hero extends DynamicEntity {
             setVelocityX(-horizontalVelocity);
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT))
             setVelocityX(horizontalVelocity);
-        if (Gdx.input.isKeyPressed(Input.Keys.Z) && (isTouchingDown || climbingLadder)) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.Z) && (isTouchingDown || climbingLadder)) {
             setVelocityY(jumpVelocity);
             climbingLadder = false;
         }

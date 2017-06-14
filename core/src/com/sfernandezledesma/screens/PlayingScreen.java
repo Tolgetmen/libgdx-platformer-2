@@ -74,7 +74,7 @@ public class PlayingScreen extends GameScreen {
     }
 
     private void testPlayground() {
-        for (int i = 0; i < 256; i += 16) {
+        for (int i = 0; i < 512; i += 16) {
             world.addStaticEntity(new StaticEntity(new AABB(i, 0, wallSprite.getWidth(), wallSprite.getHeight()), wallSprite, true));
         }
         for (int i = 0; i < 192; i += 16) {
@@ -85,9 +85,6 @@ public class PlayingScreen extends GameScreen {
         }
         for (int i = 128; i < 240; i += 16) {
             world.addStaticEntity(new StaticEntity(new AABB(i, 96, wallSprite.getWidth(), wallSprite.getHeight()), wallSprite, true));
-        }
-        for (int i = 0; i < 512; i += 16) {
-            world.addStaticEntity(new StaticEntity(new AABB(i, 0, wallSprite.getWidth(), wallSprite.getHeight()), wallSprite, true));
         }
         for (int i = 64; i < 112; i += 16) {
             world.addStaticEntity(new Ladder(new AABB(112, i, ladderSprite.getWidth(), ladderSprite.getHeight()), ladderSprite, true));

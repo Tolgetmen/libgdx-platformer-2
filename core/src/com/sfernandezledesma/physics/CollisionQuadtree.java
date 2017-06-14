@@ -41,7 +41,7 @@ public class CollisionQuadtree {
 
     public CollisionQuadtree(int level, AABB bounds, CollisionQuadtree parent) {
         this.level = level;
-        entities = new HashSet<Entity>(MAX_ENTITIES);
+        entities = new HashSet<Entity>(MAX_ENTITIES + 1);
         this.bounds = new AABB(bounds);
         this.parent = parent;
     }
@@ -57,8 +57,8 @@ public class CollisionQuadtree {
     }
 
     private void split() {
-        double halfWidth = getBounds().getWidth() / 2;
-        double halfHeight = getBounds().getHeight() / 2;
+        double halfWidth = getBounds().getWidth() / 2.0;
+        double halfHeight = getBounds().getHeight() / 2.0;
         double centerX = getBounds().leftSideX() + halfWidth;
         double centerY = getBounds().bottomSideY() + halfHeight;
         topLeftTree = new CollisionQuadtree(getLevel() + 1, new AABB(getBounds().leftSideX(), centerY, halfWidth, halfHeight), this);
@@ -90,6 +90,10 @@ public class CollisionQuadtree {
                 entities.add(e); // Even if we were "full", we had to add the entity
                 e.setQuadtree(this);
                 if (entities.size() > CollisionQuadtree.MAX_ENTITIES && level < CollisionQuadtree.MAX_LEVELS && !hasChildren()) {
+                    /*String ids = "";
+                    for (Entity element : entities)
+                        ids += " " + element.getID();
+                    Gdx.app.log("QUADTREE INFO", "Split quadtree because it had " + entities.size() + " elements. Their IDs are:" + ids);*/
                     split();
                     Iterator<Entity> it = entities.iterator();
                     while (it.hasNext()) {
@@ -115,17 +119,13 @@ public class CollisionQuadtree {
         }
         AABB box = e.getBox();
         if (box.insideOf(topLeftTree.getBounds())) {
-            topLeftTree.add(e);
-            return true;
+            return topLeftTree.add(e);
         } else if (box.insideOf(topRightTree.getBounds())) {
-            topRightTree.add(e);
-            return true;
+            return topRightTree.add(e);
         } else if (box.insideOf(bottomLeftTree.getBounds())) {
-            bottomLeftTree.add(e);
-            return true;
+            return bottomLeftTree.add(e);
         } else if (box.insideOf(bottomRightTree.getBounds())) {
-            bottomRightTree.add(e);
-            return true;
+            return bottomRightTree.add(e);
         } else
             return false;
     }
