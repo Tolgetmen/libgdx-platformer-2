@@ -20,6 +20,7 @@ package com.sfernandezledesma.screens;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.sfernandezledesma.Platformer;
 
@@ -33,6 +34,9 @@ public abstract class GameScreen implements Screen {
     GameScreen(Platformer game) {
         this.game = game;
         this.batch = game.getBatch();
+        camera = new OrthographicCamera();
+        viewport = new FitViewport(Platformer.getViewportWidth(), Platformer.getViewportHeight(), camera);
+        camera.setToOrtho(false, viewport.getWorldWidth(), viewport.getWorldHeight());
     }
 
     @Override

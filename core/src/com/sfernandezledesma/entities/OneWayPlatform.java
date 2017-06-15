@@ -23,12 +23,12 @@ import com.sfernandezledesma.physics.AABB;
 import com.sfernandezledesma.world.World;
 
 public class OneWayPlatform extends StaticEntity {
-    public OneWayPlatform(AABB box, GameSprite gameSprite, boolean centerPosition) {
-        super(box, gameSprite, centerPosition);
+    public OneWayPlatform(AABB box, GameSprite gameSprite, boolean centerPosition, World world) {
+        super(box, gameSprite, centerPosition, world);
     }
 
     @Override
-    protected boolean resolveCollisionOf(Entity entity, World world, float delta) {
-        return entity.onCollisionWithOneWayPlatform(this, world, delta);
+    protected boolean resolveCollisionOf(Entity entity, float delta) {
+        return entity.onCollisionWithOneWayPlatform(this, delta);
     }
 }

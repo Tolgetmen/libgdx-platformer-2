@@ -19,6 +19,7 @@ package com.sfernandezledesma.world;
 
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.sfernandezledesma.entities.DynamicEntity;
 import com.sfernandezledesma.entities.Entity;
@@ -36,11 +37,13 @@ public class World {
     private HashSet<DynamicEntity> dynamicEntities = new HashSet<DynamicEntity>();
     private HashSet<StaticEntity> staticEntities = new HashSet<StaticEntity>();
     private CollisionQuadtree quadtree;
+    private AssetManager assetManager;
 
-    public World(double width, double height) {
+    public World(double width, double height, AssetManager assetManager) {
         this.width = width;
         this.height = height;
         quadtree = new CollisionQuadtree(0, new AABB(0, 0, width, height), null);
+        this.setAssetManager(assetManager);
     }
 
     public void addDynamicEntity(DynamicEntity entity) {
@@ -55,7 +58,7 @@ public class World {
 
     public void update(float delta) {
         for (DynamicEntity e : dynamicEntities) {
-            e.update(this, delta);
+            e.update(delta);
         }
 
         Iterator<DynamicEntity> it = dynamicEntities.iterator();
@@ -103,5 +106,13 @@ public class World {
 
     public double getHeight() {
         return height;
+    }
+
+    public AssetManager getAssetManager() {
+        return assetManager;
+    }
+
+    public void setAssetManager(AssetManager assetManager) {
+        this.assetManager = assetManager;
     }
 }

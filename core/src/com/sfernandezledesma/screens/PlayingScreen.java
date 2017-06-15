@@ -20,12 +20,11 @@ package com.sfernandezledesma.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.FPSLogger;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.sfernandezledesma.Platformer;
 import com.sfernandezledesma.entities.DynamicEntity;
+import com.sfernandezledesma.entities.EntityFactory;
 import com.sfernandezledesma.entities.Hero;
 import com.sfernandezledesma.entities.Ladder;
 import com.sfernandezledesma.entities.OneWayPlatform;
@@ -40,12 +39,8 @@ public class PlayingScreen extends GameScreen {
     private ShapeRenderer shapeRenderer = new ShapeRenderer();
 
     private Texture texture;
-    private GameSprite heroSprite;
     private GameSprite wallSprite;
-    private GameSprite oneWayPlatformSprite;
-    private GameSprite ladderSprite;
 
-    private Hero hero;
     private World world;
     private boolean paused = true;
 
@@ -54,15 +49,9 @@ public class PlayingScreen extends GameScreen {
 
     public PlayingScreen(Platformer game) {
         super(game);
-        world = new World(512, 512);
-        texture = new Texture("simples_pimples.png");
-        camera = new OrthographicCamera();
-        viewport = new FitViewport(Platformer.getWindowWidth() / 2, Platformer.getWindowHeight() / 2, camera);
-        camera.setToOrtho(false, viewport.getWorldWidth(), viewport.getWorldHeight());
-        heroSprite = new GameSprite(texture, 416, 16, 16, 16, 3, 0);
+        world = new World(512, 512, game.getAssetManager());
+        texture = game.getAssetManager().get("simples_pimples.png", Texture.class);
         wallSprite = new GameSprite(texture, 16, 96, 16, 16, 0, 0);
-        oneWayPlatformSprite = new GameSprite(texture, 32, 768, 16, 16, 0, 0);
-        ladderSprite = new GameSprite(texture, 0, 192, 16, 16, 1, 0);
         this.vx = -10;
         this.vy = vx;
 
@@ -72,44 +61,40 @@ public class PlayingScreen extends GameScreen {
     }
 
     private void testPlayground() {
+        EntityFactory entityFactory = new EntityFactory(world);
+        entityFactory.createEntityInWorld(EntityFactory.EntityName.HERO, 128, 350);
         for (int i = 0; i < 512; i += 16) {
-            world.addStaticEntity(new StaticEntity(new AABB(i, 0, wallSprite.getWidth(), wallSprite.getHeight()), wallSprite, true));
+            entityFactory.createEntityInWorld(EntityFactory.EntityName.GROUND, i, 0);
         }
         for (int i = 0; i < 192; i += 16) {
-            world.addStaticEntity(new StaticEntity(new AABB(i, 48, wallSprite.getWidth(), wallSprite.getHeight()), wallSprite, true));
+            entityFactory.createEntityInWorld(EntityFactory.EntityName.GROUND, i, 48);
         }
         for (int i = 272; i < 512; i += 16) {
-            world.addStaticEntity(new StaticEntity(new AABB(i, 48, wallSprite.getWidth(), wallSprite.getHeight()), wallSprite, true));
+            entityFactory.createEntityInWorld(EntityFactory.EntityName.GROUND, i, 48);
         }
         for (int i = 128; i < 240; i += 16) {
-            world.addStaticEntity(new StaticEntity(new AABB(i, 96, wallSprite.getWidth(), wallSprite.getHeight()), wallSprite, true));
+            entityFactory.createEntityInWorld(EntityFactory.EntityName.GROUND, i, 96);
         }
         for (int i = 64; i < 112; i += 16) {
-            world.addStaticEntity(new Ladder(new AABB(112, i, ladderSprite.getWidth(), ladderSprite.getHeight()), ladderSprite, true));
+            entityFactory.createEntityInWorld(EntityFactory.EntityName.LADDER, 112, i);
         }
-        hero = new Hero(new AABB(128, 350, 10, 16), heroSprite, true);
-        DynamicEntity movingWall1 = new DynamicEntity(new AABB(272, 272, wallSprite.getWidth(), wallSprite.getHeight()), wallSprite, true);
+        for (int i = 0; i < 196; i += 16) {
+            entityFactory.createEntityInWorld(EntityFactory.EntityName.ONEWAY, i, 128);
+        }
+        DynamicEntity movingWall1 = new DynamicEntity(new AABB(272, 272, wallSprite.getWidth(), wallSprite.getHeight()), wallSprite, true, world);
         movingWall1.setVelocityX(vx);
         movingWall1.setVelocityY(vy);
-        DynamicEntity movingWall2 = new DynamicEntity(new AABB(288, 272, wallSprite.getWidth(), wallSprite.getHeight()), wallSprite, true);
+        DynamicEntity movingWall2 = new DynamicEntity(new AABB(288, 272, wallSprite.getWidth(), wallSprite.getHeight()), wallSprite, true, world);
         movingWall2.setVelocityX(vx);
         movingWall2.setVelocityY(vy);
-        for (int i = 0; i < 196; i += oneWayPlatformSprite.getWidth())
-            world.addStaticEntity(new OneWayPlatform(new AABB(i, 128, oneWayPlatformSprite.getWidth(), oneWayPlatformSprite.getHeight()), oneWayPlatformSprite, true));
-        world.addDynamicEntity(hero);
-        world.addDynamicEntity(movingWall2);
-        world.addDynamicEntity(movingWall1);
     }
 
     private void testMovingWalls() {
-        AABB box = new AABB(0, 0, wallSprite.getWidth(), wallSprite.getHeight());
         for (int i = 8; i < 32; i++) {
             for (int j = 24; j > 5; j--) {
-                box.setPosition(i * box.getWidth(), j * box.getHeight());
-                DynamicEntity movingWall = new DynamicEntity(box, wallSprite, true);
+                DynamicEntity movingWall = new DynamicEntity(new AABB(16 * i, 16 * j, 16, 16), wallSprite, true, world);
                 movingWall.setVelocityY(vy);
                 movingWall.setVelocityX(vx);
-                world.addDynamicEntity(movingWall);
             }
         }
     }
@@ -121,10 +106,10 @@ public class PlayingScreen extends GameScreen {
 
     @Override
     public void render(float delta) {
-        //fpsLogger.log();
-        //Gdx.app.log("QUADTREE INFO", "Total entities: " + world.getQuadtree().getTotalEntities());
-        delta = Math.min(delta, Platformer.MAX_DELTA);
-        if (!paused) world.update(delta);
+        if (paused)
+            return;
+        delta = Math.min(delta, Platformer.getMaxDelta());
+        world.update(delta);
 
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -133,6 +118,8 @@ public class PlayingScreen extends GameScreen {
         world.render(batch);
         batch.end();
 
+        //fpsLogger.log();
+        //Gdx.app.log("QUADTREE INFO", "Total entities: " + world.getQuadtree().getTotalEntities());
         shapeRenderer.setProjectionMatrix(camera.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         world.getQuadtree().debugRender(shapeRenderer);

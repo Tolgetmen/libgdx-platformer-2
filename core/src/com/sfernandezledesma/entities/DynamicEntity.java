@@ -33,19 +33,20 @@ public class DynamicEntity extends Entity {
     protected boolean updating = false;
     protected AABB newBox;
 
-    public DynamicEntity(AABB box, GameSprite gameSprite, boolean centerPosition) {
-        super(box, gameSprite, centerPosition);
+    public DynamicEntity(AABB box, GameSprite gameSprite, boolean centerPosition, World world) {
+        super(box, gameSprite, centerPosition, world);
         newBox = new AABB(box);
+        world.addDynamicEntity(this);
     }
 
     @Override
-    protected boolean resolveCollisionOf(Entity entity, World world, float delta) {
-        return entity.onCollisionWithDynamicEntity(this, world, delta);
+    protected boolean resolveCollisionOf(Entity entity, float delta) {
+        return entity.onCollisionWithDynamicEntity(this, delta);
     }
 
     @Override
-    protected boolean onCollisionWithDynamicEntity(DynamicEntity otherDynamicEntity, World world, float delta) {
-        otherDynamicEntity.update(world, delta); // Lets try to move the other entity, maybe we are not really colliding
+    protected boolean onCollisionWithDynamicEntity(DynamicEntity otherDynamicEntity, float delta) {
+        otherDynamicEntity.update(delta); // Lets try to move the other entity, maybe we are not really colliding
         return newBox.overlapsWith(otherDynamicEntity.box); // We return true if we are still colliding
     }
 
@@ -66,22 +67,22 @@ public class DynamicEntity extends Entity {
     }
 
     // Invariant: All rigid entities are NOT colliding, we have to keep that invariant after each update
-    public void update(World world, float delta) {
+    public void update(float delta) {
         if (updating)
             return;
         setUpdating(true);
         // First we update velocities, handle input, etc
         updateBeforeMoving(delta);
         // Now we try to move horizontally
-        boolean collidedHorizontally = moveAndCollideHorizontally(world, delta);
+        boolean collidedHorizontally = moveAndCollideHorizontally(delta);
         // Now we try to move vertically
-        boolean collidedVertically = moveAndCollideVertically(world, delta);
+        boolean collidedVertically = moveAndCollideVertically(delta);
         // Finally we update the entity after it moved
         updateAfterMoving(collidedHorizontally, collidedVertically, delta);
     }
 
     // Moves horizontally colliding with other entities.
-    private boolean moveAndCollideHorizontally(World world, float delta) {
+    private boolean moveAndCollideHorizontally(float delta) {
         double dx = velocityX * delta;
         newBox.syncPositionWith(box);
         newBox.translateX(dx);
@@ -94,7 +95,7 @@ public class DynamicEntity extends Entity {
             if (otherEntity.equals(this))
                 continue;
             if (newBox.overlapsWith(otherEntity.getBox())) {
-                if (otherEntity.resolveCollisionOf(this, world, delta)) {
+                if (otherEntity.resolveCollisionOf(this, delta)) {
                     collidesWithSomething = true;
                     minimumCollidingLeftSideX = Math.min(minimumCollidingLeftSideX, otherEntity.getBox().leftSideX());
                     maximumCollidingRightSideX = Math.max(maximumCollidingRightSideX, otherEntity.getBox().rightSideX());
@@ -116,7 +117,7 @@ public class DynamicEntity extends Entity {
     }
 
     // Moves vertically colliding with other entities.
-    private boolean moveAndCollideVertically(World world, float delta) {
+    private boolean moveAndCollideVertically(float delta) {
         double dy = velocityY * delta;
         newBox.syncPositionWith(box);
         newBox.translateY(dy);
@@ -129,7 +130,7 @@ public class DynamicEntity extends Entity {
             if (otherEntity.equals(this))
                 continue;
             if (newBox.overlapsWith(otherEntity.getBox())) {
-                if (otherEntity.resolveCollisionOf(this, world, delta)) {
+                if (otherEntity.resolveCollisionOf(this, delta)) {
                     collidesWithSomething = true;
                     minimumCollidingBottomSideY = Math.min(minimumCollidingBottomSideY, otherEntity.getBox().bottomSideY());
                     maximumCollidingTopSideY = Math.max(maximumCollidingTopSideY, otherEntity.getBox().topSideY());

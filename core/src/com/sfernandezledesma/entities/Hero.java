@@ -34,25 +34,25 @@ public class Hero extends DynamicEntity {
     private boolean climbingLadder = false;
     private boolean onLadder = false;
 
-    public Hero(AABB box, GameSprite gameSprite, boolean centerPosition) {
-        super(box, gameSprite, centerPosition);
+    public Hero(AABB box, GameSprite gameSprite, boolean centerPosition, World world) {
+        super(box, gameSprite, centerPosition, world);
         setAccelerationY(-gravityAccel);
     }
 
     @Override
-    protected boolean onCollisionWithStaticEntity(StaticEntity otherStaticEntity, World world, float delta) {
+    protected boolean onCollisionWithStaticEntity(StaticEntity otherStaticEntity, float delta) {
         updateTouchingDown(otherStaticEntity.box);
         return true;
     }
 
     @Override
-    protected boolean onCollisionWithDynamicEntity(DynamicEntity otherDynamicEntity, World world, float delta) {
+    protected boolean onCollisionWithDynamicEntity(DynamicEntity otherDynamicEntity, float delta) {
         updateTouchingDown(otherDynamicEntity.box);
-        return super.onCollisionWithDynamicEntity(otherDynamicEntity, world, delta);
+        return super.onCollisionWithDynamicEntity(otherDynamicEntity, delta);
     }
 
     @Override
-    protected boolean onCollisionWithOneWayPlatform(OneWayPlatform oneWayPlatform, World world, float delta) {
+    protected boolean onCollisionWithOneWayPlatform(OneWayPlatform oneWayPlatform, float delta) {
         if (velocityY <= 0 && box.bottomSideY() >= oneWayPlatform.getBox().topSideY()) {
             isTouchingDown = !stepDown;
             return isTouchingDown;
@@ -62,7 +62,7 @@ public class Hero extends DynamicEntity {
     }
 
     @Override
-    protected boolean onCollisionWithLadder(Ladder ladder, World world, float delta) {
+    protected boolean onCollisionWithLadder(Ladder ladder, float delta) {
         boolean ret;
         if (climbingLadder)
             ret = false;
@@ -85,8 +85,8 @@ public class Hero extends DynamicEntity {
     }
 
     @Override
-    protected boolean resolveCollisionOf(Entity entity, World world, float delta) {
-        return entity.onCollisionWithHero(this, world, delta);
+    protected boolean resolveCollisionOf(Entity entity, float delta) {
+        return entity.onCollisionWithHero(this, delta);
     }
 
     private void handleInput() {

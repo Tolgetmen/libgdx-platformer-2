@@ -31,15 +31,17 @@ public abstract class Entity {
     protected GameSprite gameSprite;
     protected CollisionQuadtree quadtree = null;
     protected boolean toBeDestroyed = false;
+    protected World world = null;
 
-    public Entity(AABB box, GameSprite gameSprite, boolean centerPosition) {
+    public Entity(AABB box, GameSprite gameSprite, boolean centerPosition, World world) {
         assignId();
-        this.box = new AABB(box);
-        this.gameSprite = new GameSprite(gameSprite); // For now lets assume all entities have a sprite
+        this.box = box;
+        this.gameSprite = gameSprite; // For now lets assume all entities have a sprite
         if (centerPosition) {
             this.box.translateX(gameSprite.getScreenOffsetX());
             this.box.translateY(gameSprite.getScreenOffsetY());
         }
+        this.world = world;
         //Gdx.app.log("ENTITY INFO", "Created entity " + myID);
     }
 
@@ -80,27 +82,12 @@ public abstract class Entity {
         return quadtree.update(this);
     }
 
-    protected abstract boolean resolveCollisionOf(Entity entity, World world, float delta);
-
-    protected boolean onCollisionWithDynamicEntity(DynamicEntity otherDynamicEntity, World world, float delta) {
-        return true;
-    }
-
-    protected boolean onCollisionWithStaticEntity(StaticEntity otherStaticEntity, World world, float delta) {
-        return true;
-    }
-
-    protected boolean onCollisionWithHero(Hero hero, World world, float delta) {
-        return true;
-    }
-
-    protected boolean onCollisionWithOneWayPlatform(OneWayPlatform oneWayPlatform, World world, float delta) {
-        return false;
-    }
-
-    protected boolean onCollisionWithLadder(Ladder ladder, World world, float delta) {
-        return false;
-    }
+    protected abstract boolean resolveCollisionOf(Entity entity, float delta);
+    protected boolean onCollisionWithDynamicEntity(DynamicEntity otherDynamicEntity, float delta) { return true; }
+    protected boolean onCollisionWithStaticEntity(StaticEntity otherStaticEntity, float delta) { return true; }
+    protected boolean onCollisionWithHero(Hero hero, float delta) { return true; }
+    protected boolean onCollisionWithOneWayPlatform(OneWayPlatform oneWayPlatform, float delta) { return false; }
+    protected boolean onCollisionWithLadder(Ladder ladder, float delta) { return false; }
 
     public abstract void render(SpriteBatch batch);
 

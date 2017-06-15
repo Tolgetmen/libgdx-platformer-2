@@ -18,21 +18,27 @@
 package com.sfernandezledesma;
 
 import com.badlogic.gdx.Game;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.sfernandezledesma.screens.LoadingScreen;
 import com.sfernandezledesma.screens.PlayingScreen;
 
 
 public class Platformer extends Game {
-    public static final float MAX_DELTA = 1f / 30f;
+    private static final float MAX_DELTA = 1f / 30f;
     private static final int WINDOW_WIDTH = 1024;
     private static final int WINDOW_HEIGHT = 576;
+    private static final int VIEWPORT_WIDTH = WINDOW_WIDTH / 2;
+    private static final int VIEWPORT_HEIGHT = WINDOW_HEIGHT / 2;
     private static final String TITLE = "Yet Another Platformer!";
     private SpriteBatch batch;
+    private AssetManager assetManager;
 
     @Override
     public void create() {
         batch = new SpriteBatch();
-        setScreen(new PlayingScreen(this));
+        assetManager = new AssetManager();
+        setScreen(new LoadingScreen(this));
     }
 
     @Override
@@ -43,10 +49,19 @@ public class Platformer extends Game {
     @Override
     public void dispose() {
         batch.dispose();
+        assetManager.dispose();
     }
 
     public SpriteBatch getBatch() {
         return batch;
+    }
+
+    public static int getViewportWidth() {
+        return VIEWPORT_WIDTH;
+    }
+
+    public static int getViewportHeight() {
+        return VIEWPORT_HEIGHT;
     }
 
     public static int getWindowWidth() {
@@ -59,5 +74,13 @@ public class Platformer extends Game {
 
     public static String getTitle() {
         return TITLE;
+    }
+
+    public static float getMaxDelta() {
+        return MAX_DELTA;
+    }
+
+    public AssetManager getAssetManager() {
+        return assetManager;
     }
 }

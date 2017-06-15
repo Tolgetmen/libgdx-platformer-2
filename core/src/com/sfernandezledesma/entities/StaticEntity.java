@@ -25,14 +25,15 @@ import com.sfernandezledesma.world.World;
 
 public class StaticEntity extends Entity {
 
-    public StaticEntity(AABB box, GameSprite gameSprite, boolean centerPosition) {
-        super(box, gameSprite, centerPosition);
+    public StaticEntity(AABB box, GameSprite gameSprite, boolean centerPosition, World world) {
+        super(box, gameSprite, centerPosition, world);
         this.gameSprite.setPosition((float) getX(), (float) getY());
+        world.addStaticEntity(this);
     }
 
     @Override
-    protected boolean resolveCollisionOf(Entity entity, World world, float delta) {
-        return entity.onCollisionWithStaticEntity(this, world, delta);
+    protected boolean resolveCollisionOf(Entity entity, float delta) {
+        return entity.onCollisionWithStaticEntity(this, delta);
     }
 
     @Override

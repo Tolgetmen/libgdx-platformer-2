@@ -23,12 +23,12 @@ import com.sfernandezledesma.physics.AABB;
 import com.sfernandezledesma.world.World;
 
 public class Ladder extends StaticEntity {
-    public Ladder(AABB box, GameSprite gameSprite, boolean centerPosition) {
-        super(box, gameSprite, centerPosition);
+    public Ladder(AABB box, GameSprite gameSprite, boolean centerPosition, World world) {
+        super(box, gameSprite, centerPosition, world);
     }
 
     @Override
-    protected boolean resolveCollisionOf(Entity entity, World world, float delta) {
-        return entity.onCollisionWithLadder(this, world, delta);
+    protected boolean resolveCollisionOf(Entity entity, float delta) {
+        return entity.onCollisionWithLadder(this, delta);
     }
 }
