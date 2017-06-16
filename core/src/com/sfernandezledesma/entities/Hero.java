@@ -91,11 +91,16 @@ public class Hero extends DynamicEntity {
 
     private void handleInput() {
         setVelocityX(0);
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT))
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
             setVelocityX(-horizontalVelocity);
-        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT))
+            gameSprite.setFacingRight(false);
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
             setVelocityX(horizontalVelocity);
+            gameSprite.setFacingRight(true);
+        }
         if (Gdx.input.isKeyJustPressed(Input.Keys.Z) && (isTouchingDown || climbingLadder)) {
+            gameSprite.setState(GameSprite.State.JUMPING);
             setVelocityY(jumpVelocity);
             climbingLadder = false;
         }
@@ -106,11 +111,13 @@ public class Hero extends DynamicEntity {
         if (Gdx.input.isKeyPressed(Input.Keys.UP) && onLadder) {
             setVelocityY(verticalVelocity);
             climbingLadder = true;
+            gameSprite.setState(GameSprite.State.CLIMBING);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
             if (onLadder) {
                 setVelocityY(-verticalVelocity);
                 climbingLadder = true;
+                gameSprite.setState(GameSprite.State.CLIMBING);
             }
             stepDown = true;
         }
@@ -130,9 +137,22 @@ public class Hero extends DynamicEntity {
         stepDown = false;
         if (!collidedVertically) {
             isTouchingDown = false;
+            gameSprite.setState(GameSprite.State.JUMPING);
+            if (!onLadder) {
+                climbingLadder = false;
+            } else if (climbingLadder) {
+                if (Math.abs(velocityX) == 0 && velocityY == 0)
+                    gameSprite.setState(GameSprite.State.STANDING);
+                else
+                    gameSprite.setState(GameSprite.State.CLIMBING);
+            }
         }
-        if (!onLadder) {
-            climbingLadder = false;
+        if (isTouchingDown) {
+            if (velocityX != 0) {
+                gameSprite.setState(GameSprite.State.RUNNING);
+            } else {
+                gameSprite.setState(GameSprite.State.STANDING);
+            }
         }
     }
 }

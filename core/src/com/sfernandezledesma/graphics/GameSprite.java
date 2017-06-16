@@ -21,19 +21,40 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 
 
-public class GameSprite extends Sprite {
-    private float screenOffsetX = 0;
-    private float screenOffsetY = 0;
+public abstract class GameSprite extends Sprite {
+    public enum State {STANDING, RUNNING, JUMPING, CLIMBING, ATTACKING, DEAD}
+
+    protected boolean facingRight = true;
+    protected State state = State.STANDING;
+    protected int srcX;
+    protected int srcY;
+    protected int srcWidth;
+    protected int srcHeight;
+    protected float screenOffsetX = 0;
+    protected float screenOffsetY = 0;
 
     public GameSprite(Texture texture, int srcX, int srcY, int srcWidth, int srcHeight, float screenOffsetX, float screenOffsetY) {
         super(texture, srcX, srcY, srcWidth, srcHeight);
         this.screenOffsetX = screenOffsetX;
         this.screenOffsetY = screenOffsetY;
+        this.srcX = srcX;
+        this.srcY = srcY;
+        this.srcWidth = srcWidth;
+        this.srcHeight = srcHeight;
     }
 
-    public GameSprite(GameSprite other) {
-        this(other.getTexture(), other.getRegionX(), other.getRegionY(), other.getRegionWidth(), other.getRegionHeight(), other.screenOffsetX, other.screenOffsetY);
+    public void setState(State newState) {
+        state = newState;
     }
+
+    public void setFacingRight(boolean facingRight) {
+        setFlip(!facingRight, false);
+        this.facingRight = facingRight;
+    }
+
+    /*public GameSprite(GameSprite other) {
+        this(other.getTexture(), other.getRegionX(), other.getRegionY(), other.getRegionWidth(), other.getRegionHeight(), other.screenOffsetX, other.screenOffsetY);
+    }*/
 
     public float getScreenOffsetX() {
         return screenOffsetX;

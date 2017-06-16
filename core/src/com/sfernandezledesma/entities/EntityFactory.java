@@ -20,7 +20,8 @@ package com.sfernandezledesma.entities;
 
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
-import com.sfernandezledesma.graphics.GameSprite;
+import com.sfernandezledesma.graphics.GameAnimatedSprite;
+import com.sfernandezledesma.graphics.GameFixedSprite;
 import com.sfernandezledesma.physics.AABB;
 import com.sfernandezledesma.world.World;
 
@@ -38,16 +39,16 @@ public class EntityFactory {
     public void createEntityInWorld(EntityName name, double x, double y) {
         switch (name) {
             case HERO:
-                new Hero(new AABB(x, y, 10, 16), new GameSprite(tileset, 416, 16, 16, 16, 3, 0), true, world);
+                new Hero(new AABB(x, y, 10, 16), new GameAnimatedSprite(tileset, 416, 16, 96, 16, 3, 0), true, world);
                 break;
             case GROUND:
-                new StaticEntity(new AABB(x, y, 16, 16), new GameSprite(tileset, 16, 96, 16, 16, 0, 0), true, world);
+                new StaticEntity(new AABB(x, y, 16, 16), new GameFixedSprite(tileset, 16, 96, 16, 16, 0, 0), true, world);
                 break;
             case ONEWAY:
-                new OneWayPlatform(new AABB(x, y, 16, 16), new GameSprite(tileset, 32, 768, 16, 16, 0, 0), true, world);
+                new OneWayPlatform(new AABB(x, y, 16, 16), new GameFixedSprite(tileset, 32, 768, 16, 16, 0, 0), true, world);
                 break;
             case LADDER:
-                new Ladder(new AABB(x, y, 16, 16), new GameSprite(tileset, 0, 192, 16, 16, 1, 0), true, world);
+                new Ladder(new AABB(x, y, 8, 16), new GameFixedSprite(tileset, 0, 192, 16, 16, 4, 0), true, world);
                 break;
         }
     }

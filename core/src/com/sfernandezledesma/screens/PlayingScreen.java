@@ -29,6 +29,7 @@ import com.sfernandezledesma.entities.Hero;
 import com.sfernandezledesma.entities.Ladder;
 import com.sfernandezledesma.entities.OneWayPlatform;
 import com.sfernandezledesma.entities.StaticEntity;
+import com.sfernandezledesma.graphics.GameFixedSprite;
 import com.sfernandezledesma.world.World;
 import com.sfernandezledesma.graphics.GameSprite;
 import com.sfernandezledesma.physics.AABB;
@@ -51,7 +52,7 @@ public class PlayingScreen extends GameScreen {
         super(game);
         world = new World(512, 512, game.getAssetManager());
         texture = game.getAssetManager().get("simples_pimples.png", Texture.class);
-        wallSprite = new GameSprite(texture, 16, 96, 16, 16, 0, 0);
+        wallSprite = new GameFixedSprite(texture, 16, 96, 16, 16, 0, 0);
         this.vx = -10;
         this.vy = vx;
 
